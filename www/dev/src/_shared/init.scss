@@ -1,0 +1,19 @@
+@forward 'cms/_shared/mixins/img.scss' with (
+    $imagesDir: '/images/',
+);
+@forward 'cms/_shared/mixins/center-alignment.scss';
+
+@use 'app/_shared/variables.scss'; 
+@forward 'app/_shared/variables.scss' show $fa-font-path; 
+
+@use 'cms/_shared/mixins/viewports.scss' with (
+    $referenceLayout: variables.$referenceLayout,
+    $grid-breakpoints: variables.$grid-breakpoints,
+    $container-max-widths: variables.$container-max-widths,
+);
+@forward 'cms/_shared/mixins/viewports.scss' show relMin, viewport, viewport-props, smartprops;
+
+@use 'fa-mixin' with (
+    $fa-font-path: variables.$fa-font-path,
+);
+@forward 'fa-mixin' show fa;

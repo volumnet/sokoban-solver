@@ -1,0 +1,339 @@
+@use 'sass:map';
+@use 'app/_shared/variables.scss' as *; 
+
+@layer libs, template;
+
+@layer libs {
+    @import 'scss-reset/reset';
+    // @import 'cms/_shared/ckeditor-image.scss';
+}
+
+@layer template {
+    @keyframes rotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    :root {
+        font-size: 16px; // Не менять - это для определения rem; меняется в .body
+
+        --container-gap: #{relMin(32px, $min: 16px)};
+        --container-padding: calc(50% - (var(--container-width) / 2));
+        --container-padding-absolute: calc((100vw - var(--scrollbar-size) - var(--container-width)) / 2);
+        --content-block-padding: #{relMin(80px, $min: 32px)};
+        --items-in-row: 1;
+        --gap: 0px;
+        --list-width: var(--container-width);
+        --font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        --line-height: 1.5;
+        --headings-line-height: 1.2;
+        --headings-font-family: var(--font-family);
+        --border-radius: 20px;
+        --border-radius-lg: 40px;
+        --border-radius-sm: 5px;
+        --control-height: 43px;
+        --button-height: 43px;
+        --rotation-interval: 2s;
+        --rotate: rotate var(--rotation-interval) infinite linear;
+
+        --gray-1: #111;
+        --gray-2: #222;
+        --gray-3: #333;
+        --gray-4: #444;
+        --gray-5: #555;
+        --gray-6: #666;
+        --gray-7: #777;
+        --gray-8: #888;
+        --gray-9: #999;
+        --gray-a: #aaa;
+        --gray-b: #bbb;
+        --gray-c: #ccc;
+        --gray-d: #ddd;
+        --gray-e: #eee;
+        --gray-f: #f8f8f8;
+        --red: #dc3545;
+        --yellow: #ffc107;
+        --green: #198754;
+        --cyan: #0dcaf0;
+        --body-color: black;
+        --primary: #428bca;
+        --secondary: var(--gray-6);
+        --danger: var(--red);
+        --warning: var(--yellow);
+        --success: var(--green);
+        --info: var(--cyan);
+        --input-placeholder-color: var(--gray-6);
+
+        font-family: var(--font-family);
+        line-height: var(--line-height);
+        color: var(--body-color);
+        scroll-behavior: smooth;
+        scroll-padding-top: var(--header-outer-height);
+
+        @include viewport-props((
+            --scrollbar-size: ('s&>lg': 16px, 'p|<md': 0px),
+            --header-outer-height: ('s&>xxl': 179px, 's&xl': 170px, 's&lg': 163px, 's&<md': 48px),
+            --content-ratio: ('s&>lg': .75, 'p|<md': 1),
+            --container-width: (
+                's&xxl': map.get($container-max-widths, 'xxl'),
+                's&xl': map.get($container-max-widths, 'xl'),
+                's&lg': map.get($container-max-widths, 'lg'),
+                's&md': map.get($container-max-widths, 'md'),
+                's&sm': map.get($container-max-widths, 'sm'),
+                's&xs': calc(100vw - 2rem),
+                'p': 100vw,
+            ),  
+        ));
+    }
+
+    a:not(.btn), .btn-link {
+        // transition: all .25s;
+        @include smartprops((
+            color: (
+                '': var(--primary),
+                '&:hover': color-mix(in srgb, var(--primary) 75%, white),
+            ),
+            text-decoration: (
+                '': none,
+                '&:hover': underline,
+            ),
+        ));
+    }
+
+    h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, p, ul, ol, fieldset {
+        &:first-child {
+            margin-top: 0;
+        }
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+        line-height: var(--headings-line-height);
+        font-weight: 500;
+        margin-block: relMin(24px, $min: 16px);
+        a {
+            &, &:hover, &:focus {
+                color: var(--body-color);
+            }
+        }
+    }
+    h1, h2, h3, .h1, .h2, .h3 {
+        text-align: center;
+    }
+    h1, .h1 {
+        font-size: relMin(28px, $min: 24px);
+    }
+    h2, .h2 {
+        font-size: relMin(28px, $min: 24px);
+    }
+    h3, .h3 {
+        font-size: relMin(24px, $min: 18px);
+    }
+    p {
+        margin-bottom: 16px;
+    }
+
+    label {
+        cursor: pointer;
+    }
+    strong, b {
+        font-weight: 500;
+    }
+    em, i {
+        font-style: italic;
+    }
+
+    img, .no-image {
+        max-width: 100%;
+    }
+    .raw-html-embed {
+        display: contents;
+    }
+
+    .btn:not(.btn-link), .form-control {
+        border-radius: var(--border-radius-sm);
+        font-size: 14px;
+        padding-block: 12px;
+        padding-inline: 16px;
+    }
+
+    .btn {
+        background: transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        &, &:hover, &:focus {
+            text-decoration: none;
+        }
+        &:not(.btn-link) {
+            border-width: 1px;
+            border-style: solid;
+            height: var(--button-height);
+            transition: all .25s;
+            @include smartprops((
+                opacity: (
+                    '&:not(:hover)': 1,
+                    '&:hover': .8,
+                ),
+            ));
+        }
+        &-primary {
+            background: var(--primary);
+            color: white;
+        }
+        &-success {
+            background: var(--success);
+            color: white;
+        }
+        &-danger {
+            background: var(--danger);
+            color: white;
+        }
+        &-secondary, &-default {
+            background: white;
+            color: var(--body-color);
+            border-color: var(--gray-a);
+            &:hover {
+                color: white;
+                border-color: transparent;
+                background: var(--primary);
+            }
+        }
+        &-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        &-outline-dark {
+            color: var(--body-color);
+            border-color: var(--body-color);
+        }
+        &-outline-light {
+            color: white;
+            border-color: white;
+        }
+    }
+
+    .form-group {
+        font-size: 14px;
+    }
+    .form-control {
+        display: block;
+        width: 100%;
+        background: white;
+        border: 1px solid;
+        outline: none !important;
+        transition: all .25s;
+        height: var(--control-height);
+        @include smartprops((
+            border-color: (
+                '': var(--gray-d),
+                '&:focus': var(--primary),
+                '&.is-invalid, .is-invalid &': var(--danger),
+            ),
+        ));
+        &[type="number"] {
+            padding-right: 0;
+        }
+        &:is(select) {
+            appearance: auto;
+        }
+        &:is(textarea) {
+            min-height: 64px;
+        }
+    }
+    .alert {
+        $self: &;
+        border: 1px solid;
+        border-radius: var(--border-radius-sm);
+        padding: 1rem;
+        position: relative;
+        color: color-mix(in srgb, var(--color), black);
+        border-color: color-mix(in srgb, var(--color), var(--gray-c));
+        background: color-mix(in srgb, var(--color) 20%, white);
+        &:not(:last-child) {
+            margin-bottom: 1rem;
+        }
+        @each $variant in ('danger', 'warning', 'success', 'info') {
+            &-#{$variant} {
+                --color: var(--#{$variant});
+            }
+        }
+        .btn-close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+        }
+    }
+
+    .body {
+        $self: &;
+
+        // Объявляем здесь, чтобы перекрыть font-size для rem из :root
+        font-size: relMin(16px, $min: 16px);
+
+        // Общие настройки
+        &__background-holder {
+            display: flex; // Для расширения __main по высоте экрана
+            flex-direction: column;
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            padding-inline: var(--container-padding);
+            padding-block: 1rem;
+            gap: 2rem;
+        }
+        
+        &__logo {
+            text-align: center;
+            font-family: 'Pixelify Sans', sans-serif;
+            font-size: relMin(72px, $min: 36px);
+            text-shadow: 5px 5px 5px rgba(black, .25);
+            margin-bottom: 0;
+        }
+        
+        &__left, &__right {
+            width: calc((var(--container-width) - var(--container-gap)) * (1 - var(--content-ratio)));
+            flex-shrink: 0;
+            @include viewport('p|<md') {
+                display: none;
+            }
+        }
+        &__content {
+            width: var(--content-width);
+            max-width: var(--content-width);
+            @include smartprops((
+                --content-width: (
+                    '&:not(&_sided)': var(--container-width),
+                    '&_sided': ('s&>lg': calc((var(--container-width) - var(--container-gap)) * var(--content-ratio)), 'p|<md': var(--container-width)),
+                ),
+            ));
+            #{$self}:not(#{$self}_main) & {
+                p, ul:not([class]), ol:not([class]), ul:not([class]) {
+                    margin-bottom: relMin(20px, $min: 16px);
+                }
+                ul, ol {
+                    padding-inline-start: 40px;
+                }
+                dd {
+                    margin-inline-start: 40px;
+                }
+                ul {
+                    list-style-type: disc;
+                }
+                ul ul, ol ul {
+                    list-style-type: circle;
+                }
+                ol, ul ol {
+                    list-style-type: decimal;
+                }
+            }
+        }
+    }
+}

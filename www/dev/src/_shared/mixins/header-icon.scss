@@ -1,0 +1,26 @@
+@use 'cms/_shared/mixins/center-alignment.scss' as *;
+@use 'fa-mixin' as *;
+@use 'cms/_shared/mixins/center-alignment.scss' as *;
+@use 'cms/_shared/mixins/viewports.scss' as *;
+
+@mixin header-icon($icon) {
+    transition: all .5s;
+    cursor: pointer;
+    display: inline-block;
+    border: none;
+    background: transparent;
+    outline: none !important;
+    text-decoration: none !important;
+    &:before {
+        display: block;
+        color: var(--gray-7);
+        transition: all .25s;
+        @include center-alignment(relMin(32px, $min: 24px), relMin(20px, 18px));
+        @if $icon {
+            @include fa($icon);
+        }
+    }
+    &:hover:before {
+        color: var(--primary);
+    }
+}
