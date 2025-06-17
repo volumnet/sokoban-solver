@@ -1,6 +1,6 @@
 import Point from './Point.ts';
 import BlockMovement from './BlockMovement.ts';
-import Config from 'app/model/config.ts';
+import Solver from './Solver.ts';
 
 /**
  * Массив точек
@@ -10,15 +10,11 @@ export default class PointSet
 {
     /**
      * Набор точек
-     * @type {boolean[][]}
+     * @type {[key: string Текстовое представление точки]: Point Точка}
      */
-    protected _points: boolean[][] = [];
+    protected _points: {[key: string]: Point} = {};
 
-    /**
-     * Набор точек
-     * @return {boolean[][]}
-     */
-    get points() 
+    get points(): {[key: string]: Point}
     {
         return this._points;
     }
@@ -29,23 +25,10 @@ export default class PointSet
      */
     constructor(points: Point[] = [])
     {
-        this._points = (new Array(Config.size)).fill(false, 0, Config.size).map(row => (new Array(Config.size)).fill(false, 0, Config.size));
-        const arr = [...points];
-        for (let point of arr) {
-            this._points[point.y][point.x] = true;
+        // arr.sort(); // Не нужно, предполагаем что хэш-массив не сортируемый
+        for (let point of points) {
+            this._points[point.toString()] = point;
         }
-    }
-
-
-    /**
-     * Клонировать набор точек
-     * @return {PointSet}
-     */
-    clone(): PointSet
-    {
-        let newSet = new PointSet();
-        newSet._points = this._points.map((row, i) => [...row]);
-        return newSet;
     }
 
 
@@ -56,7 +39,19 @@ export default class PointSet
      */
     hasPoint(point: Point): boolean
     {
-        return this._points[point.y][point.x];
+        return !!this._points[point.toString()];
+    }
+
+
+    /**
+     * Клонировать набор точек
+     * @return {PointSet}
+     */
+    clone(): PointSet
+    {
+        let newSet = new PointSet();
+        newSet._points = {...this._points};
+        return newSet;
     }
 
 
@@ -67,8 +62,11 @@ export default class PointSet
      */
     addPoint(point: Point): PointSet
     {
+        if (this._points[point.toString()]) {
+            return this;
+        }
         const newSet = this.clone();
-        newSet._points[point.y][point.x] = true;
+        newSet._points[point.toString()] = point;
         return newSet;
     }
 
@@ -80,8 +78,11 @@ export default class PointSet
      */
     deletePoint(point: Point): PointSet
     {
+        if (!this._points[point.toString()]) {
+            return this;
+        }
         const newSet = this.clone();
-        newSet._points[point.y][point.x] = false;
+        delete newSet._points[point.toString()];
         return newSet;
     }
 
@@ -95,8 +96,8 @@ export default class PointSet
     replacePoint(from: Point, to: Point): PointSet
     {
         const newSet = this.clone();
-        newSet._points[from.y][from.x] = false;
-        newSet._points[to.y][to.x] = true;
+        delete newSet._points[from.toString()];
+        newSet._points[to.toString()] = to;
         return newSet;
     }
 
@@ -105,20 +106,24 @@ export default class PointSet
      * Сдвигает точку (иммутабельно)
      * @param {Point} point Точка для сдвига
      * @param {BlockMovement} movement Сдвиг
-     * @return {PointSet|false}
+     * @return {PointSet}
      */
-    movePoint(point: Point, movement: BlockMovement): PointSet|false
+    movePoint(point: Point, movement: BlockMovement): PointSet
     {
-        if (!this._points[point.y][point.x] || (movement == BlockMovement.None)) {
-            return false;
+        if (movement == BlockMovement.None) {
+            return this;
+        }
+        if (!this._points[point.str]) {
+            return this;
         }
         const newPoint = point.stepTo(movement);
-        if (!newPoint || this._points[newPoint.y][newPoint.x]) {
-            return false;
+        if (!newPoint) {
+            return this;
         }
-        const newSet = this.clone();
-        newSet.replacePoint(point, newPoint);
-        return newSet;
+        if (newPoint == point) {
+            return this;
+        }
+        return this.replacePoint(point, newPoint);
     }
 
     /**
@@ -126,11 +131,7 @@ export default class PointSet
      * @return {string}
      */
     toString(): string {
-        const result = this._points.map((row, i) => {
-            const iStr = i.toString(36);
-            const newRow = row.map((cell, j) => cell ? (j.toString(36) + iStr) : '');
-            return newRow.join('');
-        }).join('');
+        const result = Object.keys(this._points).sort().join('');
         return result;
     }
 }

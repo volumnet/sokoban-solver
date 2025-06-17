@@ -1,13 +1,28 @@
 import PointSet from './PointSet.ts';
 import Point from './Point.ts';
+import Config from './Config.ts';
 import BlockMovement from './BlockMovement.ts';
 import Room from './Room.ts';
 import Level from './Level.ts';
+import Solver from './Solver.ts';
 
 /**
  * Состояние игры
  */
 export default class GameState {
+    
+    /**
+     * Набор точек около стен
+     * @type {PointSet}
+     */
+    protected _nearWalls: PointSet|null = null;
+
+    /**
+     * До куда может дойти игрок, не двигая ящики
+     * @type {{[key: string Сериализация точки]: string набор шагов}|null}
+     */
+    protected _canReachTo: {[key: string]: string}|null = null; 
+
     /**
      * Конструктор класса
      * @param {Room} readonly room Состояние комнаты
@@ -21,6 +36,64 @@ export default class GameState {
         readonly winState: PointSet,
         readonly player: Point 
     ) {
+    }
+
+
+    /**
+     * Получает набор точек возле стен
+     * @return {PointSet}
+     */
+    get nearWalls() {
+        if (!this._nearWalls) {
+            let wallsPoints: Point[] = [];
+            for (let corner of Object.values(this.room.corners.points)) {
+                // Идем вправо, проверяем верх
+                for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
+                    const wall = this.checkWall(corner, move);
+                    wallsPoints = wallsPoints.concat(wall);
+                }
+            }
+            this._nearWalls = new PointSet(wallsPoints);
+            // console.log(this._nearWalls.points)
+        }
+        return this._nearWalls;
+    }
+
+
+    /**
+     * Проверяет стену со стороны, начиная от точки
+     * @param  {Point} initial Начальная точка для проверки
+     * @param  {BlockMovement} checkDirection Направление для проверки стены
+     * @return {Point[]} Набор точек возле стены
+     */
+    checkWall(initial: Point, checkDirection: BlockMovement): Point[]
+    {
+        const result: Point[] = [];
+        let next: Point|null = initial;
+        // console.log(initial);
+        let moveDirection: BlockMovement = BlockMovement.Right;
+        if ((checkDirection == BlockMovement.Left) || (checkDirection == BlockMovement.Right)) {
+            moveDirection = BlockMovement.Down;
+        }
+        // console.log('moving to ' + moveDirection, 'check to ' + checkDirection)
+        do {
+            const possibleWall = next.stepTo(checkDirection);
+            if (this.winState.hasPoint(next)) { // Это выигрышная позиция, не считаем за стену
+                // console.log(next.str + ' is win');
+                return [];
+            }
+            if (possibleWall && !this.room.hasPoint(possibleWall)) { // Нет стены с обозначенного направления, вся стена аннулируется
+                // console.log(next.str + ' has not wall aside ' + possibleWall.str);
+                return [];
+            }
+            if (this.room.hasPoint(next)) { // Текущая позиция - стена, прерываем цикл с текущим результатом
+                // console.log(next.str + ' is wall');
+                break;
+            }
+            // console.log(next.str + ' is ok');
+            result.push(next);
+        } while (next = next.stepTo(moveDirection));
+        return result;
     }
 
 
@@ -45,38 +118,49 @@ export default class GameState {
      */
     get canReachTo(): {[key: string]: string}
     {
-        const result: {[key: string]: string} = {};
-        result[this.player.toString()] = '';
-        let ch: {[key: string]: string} = {...result};
-        while (Object.keys(ch).length) {
-            const newCh: {[key: string]: string} = {};
-            for (let pointCode in ch) {
-                const point = Point.fromString(pointCode);
-                for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
-                    const newPoint = point.stepTo(move);
-                    if (newPoint) {
-                        const newPointStr = newPoint.toString();
-                        if ((result[newPointStr] === undefined) && !this.isEngaged(newPoint)) { // undefined, поскольку первая точка со значением ''
-                            newCh[newPointStr] = result[newPointStr] = ch[pointCode] + move;
+        if (!this._canReachTo) {
+            const result: {[key: string]: string} = {};
+            result[this.player.toString()] = '';
+            let ch: {[key: string]: string} = {...result};
+            while (Object.keys(ch).length) {
+                const newCh: {[key: string]: string} = {};
+                for (let pointCode in ch) {
+                    const point = Point.fromString(pointCode);
+                    for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
+                        const newPoint = point.stepTo(move);
+                        if (newPoint) {
+                            const newPointStr = newPoint.toString();
+                            if ((result[newPointStr] === undefined) && !this.isEngaged(newPoint)) { // undefined, поскольку первая точка со значением ''
+                                newCh[newPointStr] = result[newPointStr] = ch[pointCode] + move;
+                            }
                         }
-                    }
-                };
+                    };
+                }
+                ch = newCh;
             }
-            ch = newCh;
+            this._canReachTo = result;
         }
-        return result;
+        return this._canReachTo;
     }
 
 
     /**
      * Получает возможные состояния из текущего
+     * @param {Point|null} restrictToBox ограничить движение только текущим ящиком
      * @return {[key: string Путь]: GameState}
      */
-    get nextStates(): {[key: string]: GameState} {
+    nextStates(restrictToBox: Point|null = null): {[key: string]: GameState} 
+    {
         // console.time('nextStates');
         const result: {[key: string]: GameState} = {};
         const canReachTo = this.canReachTo;
-        for (let box of Object.values(this.boxes.points)) {
+        let boxesSet: Point[];
+        if (restrictToBox) {
+            boxesSet = [restrictToBox];
+        } else {
+            boxesSet = Object.values(this.boxes.points);
+        }
+        for (let box of boxesSet) {
             for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
                 let oppositeMove: BlockMovement = BlockMovement.None;
                 let oppositeSide;
@@ -112,6 +196,7 @@ export default class GameState {
                 const newBoxes = this.boxes.movePoint(box, move);
                 if (newBoxes) {
                     const newState = new GameState(this.room, newBoxes, this.winState, box);
+                    newState._nearWalls = this.nearWalls; // Наследуем точки возле стены, т.к. room и winState не меняются
                     // console.log(box, move, newPath, newState);
                     result[newPath] = newState;
                 }
@@ -137,7 +222,13 @@ export default class GameState {
         if (this.isEngaged(newPoint)) { // Место занято
             return false;
         }
-        if (this.room.corners.hasPoint(newPoint)) { // Угол стены
+        if (this.winState.hasPoint(newPoint)) { // Выигрышное место
+            return true;
+        }
+        if (this.room.corners.hasPoint(newPoint)) { // Угол стены, но не выигрышная позиция
+            return false;
+        }
+        if (this.nearWalls.hasPoint(newPoint)) { // Позиция возле стены (не выигрышная, это определяется при определении стен)
             return false;
         }
 
@@ -189,6 +280,7 @@ export default class GameState {
      * Позиция занята
      * @param {Point} point
      * @return {boolean}
+     * @todo Оптимизировать по возможности, время 5.126/13.513 сек.
      */
     isEngaged(point: Point): boolean {
         if (this.room.hasPoint(point)) { // Стена

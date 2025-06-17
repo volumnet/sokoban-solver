@@ -1,10 +1,11 @@
 import BlockType from 'app/model/BlockType.ts';
 import Block from 'app/model/Block.ts';
 import Point from 'app/model/Point.ts';
+import PointsRepo from 'app/model/PointsRepo.ts';
 import PointSet from 'app/model/PointSet.ts';
 import Room from 'app/model/Room.ts';
 import GameState from 'app/model/GameState.ts';
-import Config from 'app/model/config.ts';
+import Config from 'app/model/Config.ts';
 
 /**
  * Уровень
@@ -58,7 +59,7 @@ export default class Level
         for (let i = 0; i < Config.size; i++) {
             for (let j = 0; j < Config.size; j++) {
                 if (this._blocks[i][j] == BlockType.Player) {
-                    return new Point(j, i);
+                    return PointsRepo.get(j, i);
                 }
             }
         }
@@ -95,13 +96,13 @@ export default class Level
             for (let j = 0; j < Config.size; j++) {
                 switch (this._blocks[i][j]) {
                     case BlockType.Wall:
-                        room.push(new Point(j, i));
+                        room.push(PointsRepo.get(j, i));
                         break;
                     case BlockType.Box:
-                        boxes.push(new Point(j, i));
+                        boxes.push(PointsRepo.get(j, i));
                         break;
                     case BlockType.Place:
-                        winState.push(new Point(j, i));
+                        winState.push(PointsRepo.get(j, i));
                         break;
                 }
             }

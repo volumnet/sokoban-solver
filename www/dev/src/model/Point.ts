@@ -1,16 +1,115 @@
 import BlockMovement from './BlockMovement.ts';
-import Level from './Level.ts';
-import Config from 'app/model/config.ts';
+import Config from './Config.ts';
+import PointsRepo from './PointsRepo.ts';
 
 /**
  * Точка в пространстве
  */
 export default class Point extends Array<number> {
+    /**
+     * Сериализация (строковое представление) точки
+     * @type {string}
+     */
+    readonly str: string = '';
+
+    /**
+     * Точка сверху
+     * @type {Point|null}
+     */
+    protected _up: Point|null|undefined = undefined;
+
+    /**
+     * Точка снизу
+     * @type {Point|null}
+     */
+    protected _down: Point|null|undefined = undefined;
+
+    /**
+     * Точка слева
+     * @type {Point|null}
+     */
+    protected _left: Point|null|undefined = undefined;
+
+    /**
+     * Точка справа
+     * @type {Point|null}
+     */
+    protected _right: Point|null|undefined = undefined;
+    
     constructor(x: number, y: number) {
         super(x, y);
+        this.str = this.x.toString(36) + this.y.toString(36);
         if (this.length !== 2) {
             throw new Error('Point должен содержать ровно 2 числа');
         }
+    }
+
+
+    /**
+     * Положение слева
+     * @return {Point|null} [description]
+     */
+    get left(): Point|null
+    {
+        if (this._left === undefined) {
+            if (this[0] > 0) {
+                this._left = PointsRepo.get(this[0] - 1, this[1]);
+            } else {
+                this._left = null;
+            }
+        }
+        return this._left;
+    }
+
+
+    /**
+     * Положение справа
+     * @return {Point|null} [description]
+     */
+    get right(): Point|null
+    {
+        if (this._right === undefined) {
+            if (this[0] < Config.size - 1) {
+                this._right = PointsRepo.get(this[0] + 1, this[1]);
+            } else {
+                this._right = null;
+            }
+        }
+        return this._right;
+    }
+
+
+    /**
+     * Положение сверху
+     * @return {Point|null} [description]
+     */
+    get up(): Point|null
+    {
+        if (this._up === undefined) {
+            if (this[1] > 0) {
+                this._up = PointsRepo.get(this[0], this[1] - 1);
+            } else {
+                this._up = null;
+            }
+        }
+        return this._up;
+    }
+
+
+    /**
+     * Положение снизу
+     * @return {Point|null} [description]
+     */
+    get down(): Point|null
+    {
+        if (this._down === undefined) {
+            if (this[1] < Config.size - 1) {
+                this._down = PointsRepo.get(this[0], this[1] + 1);
+            } else {
+                this._down = null;
+            }
+        }
+        return this._down;
     }
 
 
@@ -32,42 +131,6 @@ export default class Point extends Array<number> {
     }
 
 
-    /**
-     * Точка вверху данной, если есть
-     * @return {Point|null}
-     */
-    get up(): Point|null {
-        return this.stepTo(BlockMovement.Up);
-    }
-
-
-    /**
-     * Точка внизу данной, если есть
-     * @return {Point|null}
-     */
-    get down(): Point|null {
-        return this.stepTo(BlockMovement.Down);
-    }
-
-
-    /**
-     * Точка слева от данной, если есть
-     * @return {Point|null}
-     */
-    get left(): Point|null {
-        return this.stepTo(BlockMovement.Left);
-    }
-
-
-    /**
-     * Точка слева от данной, если есть
-     * @return {Point|null}
-     */
-    get right(): Point|null {
-        return this.stepTo(BlockMovement.Right);
-    }
-
-
     // Переопределим push и unshift, чтобы не сломать структуру
     override push(...items: number[]): number {
         throw new Error('Запрет изменения элементов в Point');
@@ -84,7 +147,7 @@ export default class Point extends Array<number> {
      * @return {string}
      */
     toString(): string {
-      return this[0].toString(36) + this[1].toString(36);
+        return this.str;
     }
 
 
@@ -94,9 +157,7 @@ export default class Point extends Array<number> {
      */
     static fromString(pos: string): Point
     {
-        const x = parseInt(pos[0] || '0', 36);
-        const y = parseInt(pos[1] || '0', 36);
-        return new Point(x, y);
+        return PointsRepo.fromString(pos);
     }
 
 
@@ -112,24 +173,16 @@ export default class Point extends Array<number> {
                 return this;
                 break;
             case BlockMovement.Left:
-                if (this[0] > 0) {
-                    return new Point(this[0] - 1, this[1]);
-                }
+                return this.left;
                 break;
             case BlockMovement.Right:
-                if (this[0] < Config.size - 1) {
-                    return new Point(this[0] + 1, this[1]);
-                }
+                return this.right;
                 break;
             case BlockMovement.Up:
-                if (this[1] > 0) {
-                    return new Point(this[0], this[1] - 1);
-                }
+                return this.up;
                 break;
             case BlockMovement.Down:
-                if (this[1] < Config.size - 1) {
-                    return new Point(this[0], this[1] + 1);
-                }
+                return this.down;
                 break;
         }
         return null;
