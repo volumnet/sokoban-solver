@@ -20,6 +20,7 @@ www/fonts/lightcase*
 www/fonts/fontawesome*
 www/fonts/font-awesome*
 www/css
+www/js
 www/dev/raasync.php
 www/dev/css/bootstrap/*
 !www/dev/css/bootstrap/variables.styl
@@ -29,3 +30,5 @@ www/dev/css/ckeditor.css
 *cidr_optim*.txt
 *cities*.txt
 node_modules
+*.log
+js
