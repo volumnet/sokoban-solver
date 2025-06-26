@@ -387,4 +387,24 @@ export default class GameState {
         // Просто двигаемся
         return new GameState(this.room, this.boxes, this.winState, nextPoint);
     }
+
+
+    /**
+     * Получает набор состояний, соответствующий пути
+     * @param  {string} path Сериализация пути
+     * @return {GameState[]}
+     */
+    getStatesFromPath(path: string): GameState[]
+    {
+        const result: GameState[] = [];
+        let currentState: GameState|null = this;
+        for (let i = 0; i < path.length; i++) {
+            currentState = currentState.playMove(path[i] as BlockMovement);
+            if (!currentState) {
+                break;
+            }
+            result.push(currentState);
+        }
+        return result;
+    }
 }

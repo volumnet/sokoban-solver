@@ -125,23 +125,14 @@ export default class Solver
         this._startTime = (new Date).getTime();
         this._active = true;
         const mainSt = performance.now();
-        while (Object.keys(ch).length && this._depth < 14) {
+        while (Object.keys(ch).length && this._depth < 60) {
             const levelSt = performance.now();
             this._depth++;
             const newCh = await this.asyncProcessDepth(ch, callback);
             if (typeof newCh == 'string') {
                 this._endTime = (new Date).getTime();
                 callback();
-                const statesToWin: GameState[] = [];
-                let currentState: GameState|null = this.gameState;
-                for (let i = 0; i < newCh.length; i++) {
-                    currentState = currentState.playMove(newCh[i] as BlockMovement);
-                    if (!currentState) {
-                        break;
-                    }
-                    statesToWin.push(currentState);
-                }
-                return statesToWin;
+                return this.gameState.getStatesFromPath(newCh);
             }
             
             // callback();

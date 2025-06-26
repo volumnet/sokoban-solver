@@ -292,7 +292,7 @@
             overflow: hidden;
             padding-inline: var(--container-padding);
             padding-block: 1rem;
-            gap: 2rem;
+            gap: relMin(2rem, $min: .5rem);
         }
         
         &__logo {

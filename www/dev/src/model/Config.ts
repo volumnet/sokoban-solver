@@ -2,5 +2,5 @@
  * Конфигурация
  */
 export default {
-    size: 16,
+    size: 32,
 };
