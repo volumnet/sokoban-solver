@@ -51,6 +51,34 @@ export default class Level
 
 
     /**
+     * Размер актуального поля
+     * @return {Point}
+     */
+    get size(): Point {
+        let w = 0;
+        let h = 0;
+        for (let i = 0; i < Config.size; i++) {
+            for (let j = 0; j < Config.size; j++) {
+                if (this._blocks[i][j] != BlockType.Empty) {
+                    h = i + 1;
+                    // console.log('new h is ' + (i + 1) + ' by ' + i + 'x' + j);
+                    break;
+                }
+            }
+        }
+        for (let i = 0; i < Config.size; i++) {
+            for (let j = w; j < Config.size; j++) {
+                if (this._blocks[i][j] != BlockType.Empty) {
+                    w = j + 1;
+                    // console.log('new w is ' + (j + 1) + ' by ' + i + 'x' + j);
+                }
+            }
+        }
+        return new Point(w, h);
+    }
+
+
+    /**
      * Возвращает положение игрока, если он есть
      * @return {Point?}
      */
