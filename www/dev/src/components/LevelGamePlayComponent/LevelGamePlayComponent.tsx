@@ -170,7 +170,8 @@ function LevelGamePlayComponent({
           }}
         />
         <div className="level__hint level__hint_desktop">
-          Используйте стрелки клавиатуры или клавиши WASD, чтобы двигаться
+          Используйте стрелки или клавиши WASD, чтобы двигаться<br />
+          Используйте Ctrl+Z / Ctrl+Y для отмены/повтора хода, либо слайдер истории ходов вверху.
         </div>
         <div className="level__hint level__hint_mobile">
           Нажимайте на свободное поле, чтобы по возможности переместиться туда.

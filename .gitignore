@@ -9,7 +9,6 @@ www/dev/verstka/*.bak/*
 vendor
 coverage
 fish
-components
 files
 logs
 composer.phar
@@ -32,3 +31,4 @@ www/dev/css/ckeditor.css
 node_modules
 *.log
 js
+/*.txt
