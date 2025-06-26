@@ -2,13 +2,13 @@
   $self: &;
   display: grid;
   position: relative;
-  grid-template-columns: repeat(var(--size), 1fr);
+  grid-template-columns: repeat(var(--width), 1fr);
   max-width: 100%;
   align-self: center;
   // aspect-ratio: var(--aspect-ratio);
   &:not(&_editor) {
     @include viewport('>md') {
-      height: calc(100vh - var(--header-outer-height) - 2rem);
+      height: calc(min((100vh - var(--header-outer-height) - 4rem), (var(--container-width) - 2rem) * 3/4 / var(--width) * var(--height)));
     }
     @include viewport("<md") {
       overflow-x: auto;

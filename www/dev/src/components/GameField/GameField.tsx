@@ -82,7 +82,7 @@ function GameField({
       className={
         className + " game-field" + (editorMode ? " game-field_editor" : "")
       }
-      style={{ "--size": realSize.x, '--aspect-ratio': (realSize.x + '/' + realSize.y) } as React.CSSProperties}
+      style={{ "--width": realSize.x, '--height': realSize.y, '--aspect-ratio': (realSize.x + '/' + realSize.y) } as React.CSSProperties}
       onMouseDown={(e) => {
         if (e.button == 0) {
           mouseState.current = 1;
