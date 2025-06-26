@@ -187,4 +187,20 @@ export default class Point extends Array<number> {
         }
         return null;
     }
+
+    /**
+     * Та же самая точка
+     * @param  {Point} point Точка для проверки
+     * @return {boolean}
+     */
+    isSame(point: Point): boolean
+    {
+        if (this == point) {
+            return true;
+        }
+        if ((this.x == point.x) && (this.y == point.y)) {
+            return true;
+        }
+        return false;
+    }
 }

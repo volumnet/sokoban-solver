@@ -195,6 +195,11 @@
             background: var(--danger);
             color: white;
         }
+        &-warning {
+            background: var(--warning);
+            color: var(--body-color);
+            border-color: transparent;
+        }
         &-secondary, &-default {
             background: white;
             color: var(--body-color);

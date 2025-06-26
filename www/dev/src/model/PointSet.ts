@@ -14,9 +14,22 @@ export default class PointSet
      */
     protected _points: {[key: string]: Point} = {};
 
+    /**
+     * Набор точек
+     * @return {[key: string Текстовое представление точки]: Point Точка}
+     */
     get points(): {[key: string]: Point}
     {
         return this._points;
+    }
+
+    /**
+     * Количество точек
+     * @type {number}
+     */
+    get length(): number
+    {
+        return Object.values(this._points).length;
     }
 
     /**

@@ -107,15 +107,6 @@ export default class Level
                 }
             }
         }
-        if (!boxes.length) {
-            throw 'Нужен хотя бы один ящик';
-        }
-        if (winState.length > boxes.length) {
-            throw ('Не хватает ящиков (еще ' + (winState.length - boxes.length) + ')');
-        }
-        if (!this.player) {
-            throw 'Не указано положение игрока';
-        }
         return new GameState(new Room(room), new PointSet(boxes), new PointSet(winState), this.player);
     }
 

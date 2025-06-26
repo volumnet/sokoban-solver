@@ -40,13 +40,19 @@ export default class Solver
      * ID# таймаута
      * @type {Number}
      */
-    protected timeoutId: number = 0;
+    protected _timeoutId: number = 0;
+
+    /**
+     * Активен ли процесс решения
+     * @type {boolean}
+     */
+    protected _active: boolean = false;
 
     /**
      * Конструктор класса
-     * @param {Level} level Уровень для решения
+     * @param {GameState} gameState Уровень для решения
      */
-    constructor(readonly level: Level, readonly syncInterval: number = 1000)
+    constructor(readonly gameState: GameState, readonly syncInterval: number = 1000)
     {
     }
 
@@ -92,17 +98,32 @@ export default class Solver
 
 
     /**
+     * Активен ли процесс решения
+     * @return {boolean}
+     */
+    get active(): boolean {
+        return !this._endTime;
+    }
+
+
+    /**
      * Решает уровень
      * @param {() => any} callback Функция обновления состояния
-     * @return {string|null} Путь к выигрышному состоянию, либо null, если не удалось найти
+     * @return {GameState[]|null|never} Путь к выигрышному состоянию, либо null, если не удалось найти
+     * @throws {string}
      */
-    async solve(callback: () => any): Promise<string|null>
+    async solve(callback: () => any): Promise<GameState[]|null>
     {
+        const initialState = this.gameState;
+        initialState.check();
+        if (!initialState.player) {
+            return null;
+        }
         let ch: {[key: string]: GameState} = {};
-        const initialState = this.level.gameState;
         ch[''] = initialState; // Начальное состояние
         
         this._startTime = (new Date).getTime();
+        this._active = true;
         const mainSt = performance.now();
         while (Object.keys(ch).length && this._depth < 14) {
             const levelSt = performance.now();
@@ -111,7 +132,16 @@ export default class Solver
             if (typeof newCh == 'string') {
                 this._endTime = (new Date).getTime();
                 callback();
-                return newCh;
+                const statesToWin: GameState[] = [];
+                let currentState: GameState|null = this.gameState;
+                for (let i = 0; i < newCh.length; i++) {
+                    currentState = currentState.playMove(newCh[i] as BlockMovement);
+                    if (!currentState) {
+                        break;
+                    }
+                    statesToWin.push(currentState);
+                }
+                return statesToWin;
             }
             
             // callback();
@@ -124,8 +154,24 @@ export default class Solver
                 'Общее время: ' + this.totalTime,
             );
         }
-        // console.log(Solver.debugTime);
+        this._endTime = (new Date).getTime();
+        callback();
+        if (this._timeoutId) {
+            throw 'Решение не найдено';
+        }
         return null;
+    }
+
+
+    /**
+     * Останавливает процесс решения
+     */
+    stop()
+    {
+        if (this._timeoutId) {
+            window.clearTimeout(this._timeoutId);
+        }
+        this._endTime = (new Date).getTime();
     }
 
 
@@ -150,7 +196,7 @@ export default class Solver
     async asyncProcessDepthChunk(states: {[key: string]: GameState}): Promise<{result: {[key: string]: GameState}, left: {[key: string]: GameState}}|string>
     {
         return new Promise((resolve, reject) => {
-            window.setTimeout(() => {
+            this._timeoutId = window.setTimeout(() => {
                 let result: {[key: string]: GameState} = {};
                 const left = {...states}
                 const st = performance.now();
@@ -190,6 +236,9 @@ export default class Solver
         const newCh: {[key: string]: GameState} = {};
         for (let pathToNextState in nextStates) {
             const nextState = nextStates[pathToNextState];
+            if (!nextState.player) {
+                continue;
+            }
             const fullPath = currentPath + pathToNextState;
             
             const nextStateBoxesCode = nextState.boxes.toString();

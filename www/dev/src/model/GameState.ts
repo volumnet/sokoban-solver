@@ -2,6 +2,7 @@ import PointSet from './PointSet.ts';
 import Point from './Point.ts';
 import Config from './Config.ts';
 import BlockMovement from './BlockMovement.ts';
+import BlockType from './BlockType.ts';
 import Room from './Room.ts';
 import Level from './Level.ts';
 import Solver from './Solver.ts';
@@ -18,6 +19,12 @@ export default class GameState {
     protected _nearWalls: PointSet|null = null;
 
     /**
+     * Является ли состояние выигрышным
+     * @type {[type]}
+     */
+    protected _isWin: boolean|null = null;
+
+    /**
      * До куда может дойти игрок, не двигая ящики
      * @type {{[key: string Сериализация точки]: string набор шагов}|null}
      */
@@ -28,14 +35,34 @@ export default class GameState {
      * @param {Room} readonly room Состояние комнаты
      * @param {PointSet} readonly boxes Состояние ящиков
      * @param {PointSet} readonly winState Выигрышное состояние
-     * @param {Point} readonly player Положение игрока
+     * @param {Point|null} readonly player Положение игрока
      */
     constructor( 
         readonly room: Room, 
         readonly boxes: PointSet, 
         readonly winState: PointSet,
-        readonly player: Point 
+        readonly player: Point|null
     ) {
+    }
+
+
+    /**
+     * Проверяет корректность уровня
+     * @return {boolean|never}
+     * @throws string
+     */
+    check(): true|never
+    {
+        if (!this.boxes.length) {
+            throw 'Нужен хотя бы один ящик';
+        }
+        if (this.winState.length > this.boxes.length) {
+            throw ('Не хватает ящиков (еще ' + (this.winState.length - this.boxes.length) + ')');
+        }
+        if (!this.player) {
+            throw 'Не указано положение игрока';
+        }
+        return true;
     }
 
 
@@ -43,7 +70,7 @@ export default class GameState {
      * Получает набор точек возле стен
      * @return {PointSet}
      */
-    get nearWalls() {
+    get nearWalls(): PointSet {
         if (!this._nearWalls) {
             let wallsPoints: Point[] = [];
             for (let corner of Object.values(this.room.corners.points)) {
@@ -57,6 +84,26 @@ export default class GameState {
             // console.log(this._nearWalls.points)
         }
         return this._nearWalls;
+    }
+
+
+    /**
+     * Получает тип блока по точке
+     * @param {Point} point Точка
+     * @return {BlockType}
+     */
+    blockType(point: Point): BlockType
+    {
+        if (this.room.hasPoint(point)) {
+            return BlockType.Wall;
+        }
+        if (this.boxes.hasPoint(point)) {
+            return BlockType.Box;
+        }
+        if (this.winState.hasPoint(point)) {
+            return BlockType.Place;
+        }
+        return BlockType.Empty;
     }
 
 
@@ -103,21 +150,29 @@ export default class GameState {
      */
     get isWin(): boolean
     {
-        for (let pointCode in this.winState.points) {
-            if (this.boxes.points[pointCode] === undefined) {
-                return false;
+        if (this._isWin === null) {
+            let newWin = true;
+            for (let pointCode in this.winState.points) {
+                if (this.boxes.points[pointCode] === undefined) {
+                    newWin = false;
+                }
             }
+            this._isWin = newWin;
         }
-        return true;
+        return this._isWin;
     }
 
 
     /**
      * До куда может дойти игрок, не двигая ящики
-     * @return {{[key: string Сериализация точки]: string набор шагов}}
+     * @return {{[key: string Сериализация точки]: string набор шагов}|never}
      */
-    get canReachTo(): {[key: string]: string}
+    get canReachTo(): {[key: string]: string}|never
     {
+        this.check();
+        if (!this.player) {
+            return {};
+        }
         if (!this._canReachTo) {
             const result: {[key: string]: string} = {};
             result[this.player.toString()] = '';
@@ -290,5 +345,46 @@ export default class GameState {
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * Движение в процессе игры
+     * @param  {BlockMovement} move Движение
+     * @return {GameState|null|neven} Следующее состояние, либо null, если невозможно сходить
+     * @throws {string} Если движение приведет к проигрышу
+     */
+    playMove(move: BlockMovement): GameState|null|never
+    {
+        if (!this.player) {
+            return null; // Нет игрока
+        }
+        const nextPoint = this.player.stepTo(move);
+        if (!nextPoint) {
+            return null; // Невозможно сходить, конец экрана
+        }
+        if (this.room.hasPoint(nextPoint)) {
+            return null; // Уперся в стену
+        }
+        if (this.boxes.hasPoint(nextPoint)) { // Двигаем ящик
+            const nextNextPoint = nextPoint.stepTo(move);
+            if (!nextNextPoint) {
+                return null; // Невозможно передвинуть, конец экрана
+            }
+            if (this.isEngaged(nextNextPoint)) {
+                return null; // Ящик уперся в стену или другой ящик
+            }
+            if (!this.blockMovementAvailable(nextPoint, move)) {
+                throw 'Этот ход приведет к проигрышу, не надо так!';
+            }
+            const newBoxes = this.boxes.movePoint(nextPoint, move);
+            if (!newBoxes) {
+                return null; // Невозможно сходить 
+            }
+            return new GameState(this.room, newBoxes, this.winState, nextPoint);
+        }
+
+        // Просто двигаемся
+        return new GameState(this.room, this.boxes, this.winState, nextPoint);
     }
 }
