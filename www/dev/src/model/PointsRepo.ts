@@ -13,7 +13,7 @@ export default class PointsRepo {
 
   /**
    * Набор точек по кодам
-   * @type {Point[][]}
+   * @type {{ [key: string]: Point }}
    */
   protected static pointsByCodes: { [key: string]: Point } = {};
 
