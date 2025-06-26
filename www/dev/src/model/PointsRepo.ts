@@ -1,5 +1,4 @@
-import Point from "./Point.ts";
-import Config from "./Config.ts";
+import { Point, Config } from "app/model";
 
 /**
  * Репозиторий точек

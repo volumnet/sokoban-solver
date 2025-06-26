@@ -1,8 +1,4 @@
-import Level from "./Level.ts";
-import GameState from "./GameState.ts";
-import PointSet from "./PointSet.ts";
-import PointsRepo from "./PointsRepo.ts";
-import BlockMovement from "./BlockMovement.ts";
+import { GameState, BlockMovement } from "app/model";
 
 /**
  * Решение уровня

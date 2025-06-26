@@ -1,5 +1,4 @@
-import BlockType from "./BlockType.ts";
-import BlockMovement from "./BlockMovement.ts";
+import { BlockType, BlockMovement } from "app/model";
 
 /**
  * Блок

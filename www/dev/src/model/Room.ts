@@ -1,9 +1,4 @@
-import Point from "./Point.ts";
-import PointsRepo from "./PointsRepo.ts";
-import PointSet from "./PointSet.ts";
-import Level from "./Level.ts";
-import BlockMovement from "./BlockMovement.ts";
-import Config from "./Config.ts";
+import { Point, PointsRepo, PointSet, Config } from "app/model";
 
 /**
  * Состояние комнаты

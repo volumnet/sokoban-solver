@@ -1,6 +1,4 @@
-import Point from "./Point.ts";
-import BlockMovement from "./BlockMovement.ts";
-import Solver from "./Solver.ts";
+import { Point, BlockMovement } from "app/model";
 
 /**
  * Массив точек

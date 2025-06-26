@@ -1,4 +1,4 @@
-import Level from "./Level.ts";
+import { Level } from "app/model";
 
 /**
  * Класс загрузки/сохранения уровней в localStorage

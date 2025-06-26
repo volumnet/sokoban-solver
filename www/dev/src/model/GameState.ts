@@ -1,11 +1,4 @@
-import PointSet from "./PointSet.ts";
-import Point from "./Point.ts";
-import Config from "./Config.ts";
-import BlockMovement from "./BlockMovement.ts";
-import BlockType from "./BlockType.ts";
-import Room from "./Room.ts";
-import Level from "./Level.ts";
-import Solver from "./Solver.ts";
+import { PointSet, Point, BlockMovement, BlockType, Room } from "app/model";
 
 /**
  * Состояние игры

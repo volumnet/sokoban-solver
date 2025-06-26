@@ -1,6 +1,4 @@
-import BlockMovement from "./BlockMovement.ts";
-import Config from "./Config.ts";
-import PointsRepo from "./PointsRepo.ts";
+import { BlockMovement, Config, PointsRepo } from "app/model";
 
 /**
  * Точка в пространстве
