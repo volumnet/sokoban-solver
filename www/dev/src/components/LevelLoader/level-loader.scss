@@ -1,0 +1,13 @@
+.level-loader {
+  position: relative;
+  cursor: pointer;
+  &_drag {
+    opacity: 0.5;
+  }
+  input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+}

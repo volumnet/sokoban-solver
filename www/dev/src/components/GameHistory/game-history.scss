@@ -1,0 +1,42 @@
+.game-history {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0;
+  max-width: 100%;
+  &__range {
+    flex-grow: 1;
+  }
+  &__stats {
+    font-weight: bold;
+    white-space: nowrap;
+    &_win {
+      color: var(--success);
+    }
+  }
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  &__control {
+    size: 24px;
+    background: var(--body-color);
+    mask: center center / contain no-repeat;
+    &:not(&_disabled):hover {
+      background-color: var(--primary);
+    }
+    &_play {
+      mask-image: img("play");
+    }
+    &_pause {
+      mask-image: img("pause");
+    }
+    &_replay {
+      mask-image: img("replay");
+    }
+    &_disabled {
+      pointer-events: none;
+      opacity: 0.25;
+    }
+  }
+}

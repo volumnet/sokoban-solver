@@ -1,0 +1,30 @@
+.block {
+  display: block;
+  aspect-ratio: 1/1;
+  position: relative;
+  border: 1px solid var(--gray-d);
+  background: center center / contain no-repeat;
+
+  &:after-c {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: center center / contain no-repeat;
+  }
+
+  &_wall {
+    background-image: img("wall.jpg");
+  }
+  &_player:after {
+    background-image: img("player.png");
+  }
+  &_box {
+    background-image: img("box.jpg");
+  }
+  &_place {
+    background-color: color-mix(in srgb, var(--success), transparent 75%);
+  }
+  &_not-available {
+    background-color: color-mix(in srgb, var(--danger), transparent 85%);
+  }
+}

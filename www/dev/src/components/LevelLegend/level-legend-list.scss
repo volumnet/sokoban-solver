@@ -1,0 +1,17 @@
+.level-legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  &__item {
+    size: 48px;
+    cursor: pointer;
+    @include viewport("lg") {
+      size: 40px;
+    }
+    &_active {
+      border-width: 2px !important;
+      border-color: red !important;
+    }
+  }
+}
