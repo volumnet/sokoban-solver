@@ -22,7 +22,7 @@
     background-image: img("box.jpg");
   }
   &_place {
-    background-color: color-mix(in srgb, var(--success), transparent 75%);
+    background-color: var(--success);
   }
   &_not-available {
     background-color: color-mix(in srgb, var(--danger), transparent 85%);
