@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Level, Block, BlockType, Solver, LevelFileProcessor } from "app/model";
+import { Level, BlockType, Solver, LevelFileProcessor } from "app/model";
 import { LevelLegend, LevelEditorComponent, LevelGamePlayComponent, GameField, LevelLoader } from "app/components";
 
 /**

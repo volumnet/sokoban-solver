@@ -1,4 +1,3 @@
-import Block from "./Block.ts";
 import BlockMovement from "./BlockMovement.ts";
 import BlockType from "./BlockType.ts";
 import Config from "./Config.ts";
@@ -11,9 +10,9 @@ import PointSet from "./PointSet.ts";
 import PointsRepo from "./PointsRepo.ts";
 import Room from "./Room.ts";
 import Solver from "./Solver.ts";
+import StateLogEntry from "./StateLogEntry.ts";
 
 export {
-  Block,
   BlockMovement,
   BlockType,
   Config,
@@ -26,4 +25,5 @@ export {
   PointsRepo,
   Room,
   Solver,
+  type StateLogEntry,
 };

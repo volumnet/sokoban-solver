@@ -1,4 +1,4 @@
-import { PointSet, Point, BlockMovement, BlockType, Room } from "app/model";
+import { PointSet, Point, BlockMovement, BlockType, Room } from 'app/model';
 
 /**
  * Состояние игры
@@ -43,17 +43,13 @@ export default class GameState {
    */
   check(): true | never {
     if (!this.boxes.length) {
-      throw "Нужен хотя бы один ящик";
+      throw 'Нужен хотя бы один ящик';
     }
     if (this.winState.length > this.boxes.length) {
-      throw (
-        "Не хватает ящиков (еще " +
-        (this.winState.length - this.boxes.length) +
-        ")"
-      );
+      throw 'Не хватает ящиков (еще ' + (this.winState.length - this.boxes.length) + ')';
     }
     if (!this.player) {
-      throw "Не указано положение игрока";
+      throw 'Не указано положение игрока';
     }
     return true;
   }
@@ -67,12 +63,7 @@ export default class GameState {
       let wallsPoints: Point[] = [];
       for (let corner of Object.values(this.room.corners.points)) {
         // Идем вправо, проверяем верх
-        for (let move of [
-          BlockMovement.Up,
-          BlockMovement.Right,
-          BlockMovement.Down,
-          BlockMovement.Left,
-        ]) {
+        for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
           const wall = this.checkWall(corner, move);
           wallsPoints = wallsPoints.concat(wall);
         }
@@ -112,10 +103,7 @@ export default class GameState {
     let next: Point | null = initial;
     // console.log(initial);
     let moveDirection: BlockMovement = BlockMovement.Right;
-    if (
-      checkDirection == BlockMovement.Left ||
-      checkDirection == BlockMovement.Right
-    ) {
+    if (checkDirection == BlockMovement.Left || checkDirection == BlockMovement.Right) {
       moveDirection = BlockMovement.Down;
     }
     // console.log('moving to ' + moveDirection, 'check to ' + checkDirection)
@@ -170,25 +158,17 @@ export default class GameState {
     }
     if (!this._canReachTo) {
       const result: { [key: string]: string } = {};
-      result[this.player.toString()] = "";
+      result[this.player.toString()] = '';
       let ch: { [key: string]: string } = { ...result };
       while (Object.keys(ch).length) {
         const newCh: { [key: string]: string } = {};
         for (let pointCode in ch) {
           const point = Point.fromString(pointCode);
-          for (let move of [
-            BlockMovement.Up,
-            BlockMovement.Right,
-            BlockMovement.Down,
-            BlockMovement.Left,
-          ]) {
+          for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
             const newPoint = point.stepTo(move);
             if (newPoint) {
               const newPointStr = newPoint.toString();
-              if (
-                result[newPointStr] === undefined &&
-                !this.isEngaged(newPoint)
-              ) {
+              if (result[newPointStr] === undefined && !this.isEngaged(newPoint)) {
                 // undefined, поскольку первая точка со значением ''
                 newCh[newPointStr] = result[newPointStr] = ch[pointCode] + move;
               }
@@ -205,11 +185,13 @@ export default class GameState {
   /**
    * Получает возможные состояния из текущего
    * @param {Point|null} restrictToBox ограничить движение только текущим ящиком
-   * @return {[key: string Путь]: GameState}
+   * @return {[key: string Путь]: { state: GameState Состояние, box: Point Передвигаемый ящик, move: BlockMovement Движение ящика, playerMove: string Сериализация движения игрока }}
    */
-  nextStates(restrictToBox: Point | null = null): { [key: string]: GameState } {
+  nextStates(restrictToBox: Point | null = null): {
+    [key: string]: { state: GameState; box: Point; move: BlockMovement; playerMove: string };
+  } {
     // console.time('nextStates');
-    const result: { [key: string]: GameState } = {};
+    const result: { [key: string]: { state: GameState; box: Point; move: BlockMovement; playerMove: string } } = {};
     const canReachTo = this.canReachTo;
     let boxesSet: Point[];
     if (restrictToBox) {
@@ -218,12 +200,7 @@ export default class GameState {
       boxesSet = Object.values(this.boxes.points);
     }
     for (let box of boxesSet) {
-      for (let move of [
-        BlockMovement.Up,
-        BlockMovement.Right,
-        BlockMovement.Down,
-        BlockMovement.Left,
-      ]) {
+      for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
         let oppositeMove: BlockMovement = BlockMovement.None;
         let oppositeSide;
         switch (move) {
@@ -261,15 +238,15 @@ export default class GameState {
         const newPath = oppositeSidePath + move;
         const newBoxes = this.boxes.movePoint(box, move);
         if (newBoxes) {
-          const newState = new GameState(
-            this.room,
-            newBoxes,
-            this.winState,
-            box,
-          );
+          const newState = new GameState(this.room, newBoxes, this.winState, box);
           newState._nearWalls = this.nearWalls; // Наследуем точки возле стены, т.к. room и winState не меняются
           // console.log(box, move, newPath, newState);
-          result[newPath] = newState;
+          result[newPath] = {
+            state: newState,
+            box,
+            move,
+            playerMove: oppositeSidePath,
+          };
         }
       }
     }
@@ -329,10 +306,7 @@ export default class GameState {
         }
         break;
       case BlockMovement.Down:
-        if (
-          hasDown &&
-          ((hasLeft && hasDownLeft) || (hasRight && hasDownRight))
-        ) {
+        if (hasDown && ((hasLeft && hasDownLeft) || (hasRight && hasDownRight))) {
           return false;
         }
         break;
@@ -396,7 +370,7 @@ export default class GameState {
         return null; // Ящик уперся в стену или другой ящик
       }
       if (!this.blockMovementAvailable(nextPoint, move)) {
-        throw "Этот ход приведет к проигрышу, не надо так!";
+        throw 'Этот ход приведет к проигрышу, не надо так!';
       }
       const newBoxes = this.boxes.movePoint(nextPoint, move);
       if (!newBoxes) {
@@ -425,5 +399,14 @@ export default class GameState {
       result.push(currentState);
     }
     return result;
+  }
+
+  /**
+   * Сериализация состояния
+   * @return {string}
+   */
+  toString(): string
+  {
+      return (this?.player?.toString() || '') + '@' + this.boxes.toString();
   }
 }

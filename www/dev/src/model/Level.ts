@@ -1,4 +1,4 @@
-import { BlockType, Block, Point, PointsRepo, PointSet, Room, GameState, Config } from "app/model";
+import { BlockType, Point, PointsRepo, PointSet, Room, GameState, Config } from "app/model";
 
 /**
  * Уровень
@@ -9,7 +9,7 @@ export default class Level {
   /**
    * Конструктор класса
    * @param {string} name   Название уровня
-   * @param {Block[][]} blocks Блоки
+   * @param {BlockType[][]} blocks Блоки
    */
   constructor(
     public name: string = "",

@@ -1,4 +1,4 @@
-import { Level, Block, BlockType } from "app/model";
+import { Level, BlockType } from "app/model";
 import { BlockComponent } from "app/components";
 
 /**

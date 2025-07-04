@@ -1,4 +1,4 @@
-import { GameState, BlockMovement } from 'app/model';
+import { GameState, BlockMovement, StateLogEntry } from 'app/model';
 
 /**
  * Решение уровня
@@ -12,6 +12,12 @@ export default class Solver {
    * @type {[key: string Состояние ящиков]: {[key: string Состояние игрока]: boolean}}
    */
   readonly states: { [key: string]: { [key: string]: boolean } } = {};
+
+  /**
+   * Лог перебираемых состояний
+   * @type {StateLogEntry[]}
+   */
+  private _statesLog: StateLogEntry[] = [];
 
   /**
    * Вложенность (ходов со сдвигом ящиков)
@@ -44,12 +50,21 @@ export default class Solver {
   protected _active: boolean = false;
 
   /**
+   * Количество перебранных вариантов
+   * @type {number}
+   */
+  protected _variants: number = 0;
+
+  /**
    * Конструктор класса
    * @param {GameState} gameState Уровень для решения
+   * @param {number} syncInterval Интервал синхронизации, мс
+   * @param {boolean} writeLog Писать лог состояний
    */
   constructor(
     readonly gameState: GameState,
     readonly syncInterval: number = 1000,
+    readonly writeLog: boolean = false,
   ) {}
 
   /**
@@ -65,7 +80,7 @@ export default class Solver {
    * @return {number}
    */
   get variants(): number {
-    return Object.keys(this.states).length;
+    return this._variants;
   }
 
   /**
@@ -96,6 +111,16 @@ export default class Solver {
     return !this._endTime;
   }
 
+
+  /**
+   * Лог перебираемых состояний
+   * @return {StateLogEntry[]}
+   */
+  get statesLog(): StateLogEntry[]
+  {
+      return this._statesLog;
+  }
+
   /**
    * Решает уровень
    * @param {() => any} callback Функция обновления состояния
@@ -110,6 +135,17 @@ export default class Solver {
     }
     let ch: { [key: string]: GameState } = {};
     ch[''] = initialState; // Начальное состояние
+    if (this.writeLog) {
+        this._statesLog.push({
+          fromState: '',
+          state: initialState.toString(),
+          box: '',
+          move: '',
+          playerMove: '',
+          fullPath: '',
+          isWin: initialState.isWin,
+        });
+    }
 
     this._startTime = new Date().getTime();
     this._active = true;
@@ -222,8 +258,10 @@ export default class Solver {
   processState(currentPath: string, currentState: GameState): { [key: string]: GameState } {
     const nextStates = currentState.nextStates();
     const newCh: { [key: string]: GameState } = {};
+    const currentStateString = currentState.toString();
     for (let pathToNextState in nextStates) {
-      const nextState = nextStates[pathToNextState];
+      const nextStateData = nextStates[pathToNextState];
+      const nextState = nextStateData.state;
       if (!nextState.player) {
         continue;
       }
@@ -235,6 +273,18 @@ export default class Solver {
         this.states[nextStateBoxesCode] = {};
       }
       if (!this.states[nextStateBoxesCode][nextStatePlayerCode]) {
+        this._variants++;
+        if (this.writeLog) {
+            this._statesLog.push({
+              fromState: currentStateString,
+              state: nextState.toString(),
+              box: nextStateData.box.toString(),
+              move: nextStateData.move as string,
+              playerMove: pathToNextState,
+              fullPath,
+              isWin: nextState.isWin,
+            });
+        }
         const canReachTo = nextState.canReachTo;
         for (let box of Object.values(nextState.boxes.points)) {
           for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
