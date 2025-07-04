@@ -150,7 +150,7 @@ export default class Solver {
     this._startTime = new Date().getTime();
     this._active = true;
     const mainSt = performance.now();
-    while (Object.keys(ch).length && this._depth < 60) {
+    while (Object.keys(ch).length && this._depth < 200) {
       const levelSt = performance.now();
       this._depth++;
       const newCh = await this.asyncProcessDepth(ch, callback);
