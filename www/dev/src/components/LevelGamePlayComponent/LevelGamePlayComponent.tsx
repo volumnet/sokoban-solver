@@ -145,7 +145,7 @@ function LevelGamePlayComponent({
         }
         window.setTimeout(() => {
           alert('Решение найдено!');
-          console.log(solver);
+          // console.log(solver);
         });
       }
     } catch (e) {
@@ -165,14 +165,14 @@ function LevelGamePlayComponent({
     if (!solver?.current?.statesLog?.length) {
       return;
     }
-    let text = "Из состояния;В состояние;Ящик;Движение;Ходы игрока;Полный путь;Выигрыш\n";
+    let text = "Из состояния;Ящик;Движение;Ходы игрока;В состояние;Полный путь;Выигрыш\n";
     text += solver.current.statesLog.map((stateLogEntry: StateLogEntry): string => {
       return (
         stateLogEntry.fromState + ';' +
-        stateLogEntry.state + ';' +
         stateLogEntry.box + ';' +
         stateLogEntry.move + ';' +
         stateLogEntry.playerMove + ';' +
+        stateLogEntry.state + ';' +
         stateLogEntry.fullPath + ';' +
         (stateLogEntry.isWin ? '1' : '')
       );
