@@ -37,9 +37,6 @@ export default class Point extends Array<number> {
   constructor(x: number, y: number) {
     super(x, y);
     this.str = this.x.toString(36) + this.y.toString(36);
-    if (this.length !== 2) {
-      throw new Error("Point должен содержать ровно 2 числа");
-    }
   }
 
   /**
@@ -152,21 +149,20 @@ export default class Point extends Array<number> {
     switch (movement) {
       case BlockMovement.None:
         return this;
-        break;
+        // break;
       case BlockMovement.Left:
         return this.left;
-        break;
+        // break;
       case BlockMovement.Right:
         return this.right;
-        break;
+        // break;
       case BlockMovement.Up:
         return this.up;
-        break;
+        // break;
       case BlockMovement.Down:
         return this.down;
-        break;
+        // break;
     }
-    return null;
   }
 
   /**

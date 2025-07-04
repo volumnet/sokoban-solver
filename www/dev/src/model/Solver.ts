@@ -1,4 +1,4 @@
-import { GameState, BlockMovement } from "app/model";
+import { GameState, BlockMovement } from 'app/model';
 
 /**
  * Решение уровня
@@ -109,7 +109,7 @@ export default class Solver {
       return null;
     }
     let ch: { [key: string]: GameState } = {};
-    ch[""] = initialState; // Начальное состояние
+    ch[''] = initialState; // Начальное состояние
 
     this._startTime = new Date().getTime();
     this._active = true;
@@ -118,7 +118,7 @@ export default class Solver {
       const levelSt = performance.now();
       this._depth++;
       const newCh = await this.asyncProcessDepth(ch, callback);
-      if (typeof newCh == "string") {
+      if (typeof newCh == 'string') {
         this._endTime = new Date().getTime();
         callback();
         return this.gameState.getStatesFromPath(newCh);
@@ -127,19 +127,19 @@ export default class Solver {
       // callback();
       ch = newCh;
       console.log(
-        "Вложенность: " + this._depth,
-        "Состояний: ",
+        'Вложенность: ' + this._depth,
+        'Состояний: ',
         Object.keys(ch).length,
-        "Всего состояний: ",
+        'Всего состояний: ',
         this.variants,
-        "Время: " + (performance.now() - levelSt),
-        "Общее время: " + this.totalTime,
+        'Время: ' + Math.round((performance.now() - levelSt) * 1000) / 1000,
+        'Общее время: ' + this.totalTime,
       );
     }
     this._endTime = new Date().getTime();
     callback();
     if (this._timeoutId) {
-      throw "Решение не найдено";
+      throw 'Решение не найдено';
     }
     return null;
   }
@@ -168,7 +168,7 @@ export default class Solver {
             left: { [key: string]: GameState };
           }
         | string = await this.asyncProcessDepthChunk(left);
-      if (typeof subresult == "string") {
+      if (typeof subresult == 'string') {
         return subresult;
       }
       Object.assign(result, subresult.result);
@@ -178,9 +178,7 @@ export default class Solver {
     return result;
   }
 
-  async asyncProcessDepthChunk(states: {
-    [key: string]: GameState;
-  }): Promise<
+  async asyncProcessDepthChunk(states: { [key: string]: GameState }): Promise<
     | {
         result: { [key: string]: GameState };
         left: { [key: string]: GameState };
@@ -198,10 +196,7 @@ export default class Solver {
             resolve(currentPath);
             break;
           }
-          const processStateResult = this.processState(
-            currentPath,
-            currentState,
-          );
+          const processStateResult = this.processState(currentPath, currentState);
           delete left[currentPath];
           // const processStateResult = await this.asyncProcessState(currentPath, currentState);
           // result = {...result, ...processStateResult}; // Работает слишком долго
@@ -224,10 +219,7 @@ export default class Solver {
    * @param {GameState} currentState Текущее состояние
    * @return {{[key: string]: GameState}} Набор следующих состояний
    */
-  processState(
-    currentPath: string,
-    currentState: GameState,
-  ): { [key: string]: GameState } {
+  processState(currentPath: string, currentState: GameState): { [key: string]: GameState } {
     const nextStates = currentState.nextStates();
     const newCh: { [key: string]: GameState } = {};
     for (let pathToNextState in nextStates) {
@@ -245,12 +237,7 @@ export default class Solver {
       if (!this.states[nextStateBoxesCode][nextStatePlayerCode]) {
         const canReachTo = nextState.canReachTo;
         for (let box of Object.values(nextState.boxes.points)) {
-          for (let move of [
-            BlockMovement.Up,
-            BlockMovement.Right,
-            BlockMovement.Down,
-            BlockMovement.Left,
-          ]) {
+          for (let move of [BlockMovement.Up, BlockMovement.Right, BlockMovement.Down, BlockMovement.Left]) {
             const boxNeighbor = box.stepTo(move);
             if (boxNeighbor && canReachTo[boxNeighbor.str]) {
               this.states[nextStateBoxesCode][boxNeighbor.str] = true;
